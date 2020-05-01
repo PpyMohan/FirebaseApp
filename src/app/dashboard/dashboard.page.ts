@@ -1,31 +1,19 @@
-import { Component, NgZone } from '@angular/core';
-import { AlertController } from '@ionic/angular';
-import { LoadingController, ToastController } from '@ionic/angular';
-import { Router } from '@angular/router';
-import { AngularFireAuth } from '@angular/fire/auth';
+import { Component, OnInit, NgZone } from '@angular/core';
 import * as am4core from "@amcharts/amcharts4/core";
 import * as am4charts from "@amcharts/amcharts4/charts";
 import am4themes_animated from "@amcharts/amcharts4/themes/animated";
 
 am4core.useTheme(am4themes_animated);
 
-
 @Component({
-  selector: 'app-home',
-  templateUrl: 'home.page.html',
-  styleUrls: ['home.page.scss'],
+  selector: 'app-dashboard',
+  templateUrl: './dashboard.page.html',
+  styleUrls: ['./dashboard.page.scss'],
 })
-export class HomePage {
+export class DashboardPage{
   private chart: am4charts.XYChart;
-  constructor(private fireauth: AngularFireAuth,
-    private router: Router,
-    private toastController: ToastController,
-    public loadingController: LoadingController,
-    public alertController: AlertController, private zone: NgZone) {
-
+  constructor(private zone: NgZone) {
   }
-
-
   ngAfterViewInit() {
     this.zone.runOutsideAngular(() => {
       let chart = am4core.create("chartdiv", am4charts.XYChart);
@@ -69,15 +57,5 @@ export class HomePage {
         this.chart.dispose();
       }
     });
-  }
-  async openLoader() {
-    const loading = await this.loadingController.create({
-      message: 'Please Wait ...',
-      duration: 2000
-    });
-    await loading.present();
-  }
-  async closeLoading() {
-    return await this.loadingController.dismiss();
   }
 }
