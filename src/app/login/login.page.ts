@@ -39,7 +39,7 @@ export class LoginPage {
         if (res.user) {
           console.log(res.user);
           this.closeLoading();
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/home']);
         }
       })
       .catch(err => {

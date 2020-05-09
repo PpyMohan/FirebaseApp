@@ -13,6 +13,7 @@ import { AngularFireModule } from '@angular/fire';
 import { AngularFireAuthModule } from '@angular/fire/auth';
 import { environment } from '../environments/environment';
 import * as firebase from 'firebase';
+// import { FirebaseService } from './firebase.service';
 
 firebase.initializeApp(environment.config);
 
@@ -21,7 +22,8 @@ firebase.initializeApp(environment.config);
   entryComponents: [],
   imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule,
       AngularFireAuthModule,
-      AngularFireModule.initializeApp(environment.config)],
+      AngularFireModule.initializeApp(environment.config),
+      ],
   providers: [
     StatusBar,
     SplashScreen,

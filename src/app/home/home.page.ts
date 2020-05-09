@@ -3,11 +3,7 @@ import { AlertController } from '@ionic/angular';
 import { LoadingController, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { AngularFireAuth } from '@angular/fire/auth';
-import * as am4core from "@amcharts/amcharts4/core";
-import * as am4charts from "@amcharts/amcharts4/charts";
-import am4themes_animated from "@amcharts/amcharts4/themes/animated";
-
-am4core.useTheme(am4themes_animated);
+import { FirebaseService } from './../firebase.service';
 
 
 @Component({
@@ -16,68 +12,63 @@ am4core.useTheme(am4themes_animated);
   styleUrls: ['home.page.scss'],
 })
 export class HomePage {
-  private chart: am4charts.XYChart;
-  constructor(private fireauth: AngularFireAuth,
-    private router: Router,
-    private toastController: ToastController,
-    public loadingController: LoadingController,
-    public alertController: AlertController, private zone: NgZone) {
+  students: any;
+  studentName: string;
+  studentAge: number;
+  studentAddress: string;
 
-  }
+  constructor(private crudService: FirebaseService) { }
 
+  ngOnInit() {
+    this.crudService.read_students().subscribe(data => {
 
-  ngAfterViewInit() {
-    this.zone.runOutsideAngular(() => {
-      let chart = am4core.create("chartdiv", am4charts.XYChart);
+      this.students = data.map(e => {
+        return {
+          id: e.payload.doc.id,
+          isEdit: false,
+          Name: e.payload.doc.data()['Name'],
+          Age: e.payload.doc.data()['Age'],
+          Address: e.payload.doc.data()['Address'],
+        };
+      })
+      console.log(this.students);
 
-      chart.paddingRight = 20;
-
-      let data = [];
-      let visits = 10;
-      for (let i = 1; i < 366; i++) {
-        visits += Math.round((Math.random() < 0.5 ? 1 : -1) * Math.random() * 10);
-        data.push({ date: new Date(2018, 0, i), name: "name" + i, value: visits });
-      }
-
-      chart.data = data;
-
-      let dateAxis = chart.xAxes.push(new am4charts.DateAxis());
-      dateAxis.renderer.grid.template.location = 0;
-
-      let valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
-      valueAxis.tooltip.disabled = true;
-      valueAxis.renderer.minWidth = 35;
-
-      let series = chart.series.push(new am4charts.LineSeries());
-      series.dataFields.dateX = "date";
-      series.dataFields.valueY = "value";
-
-      series.tooltipText = "{valueY.value}";
-      chart.cursor = new am4charts.XYCursor();
-
-      let scrollbarX = new am4charts.XYChartScrollbar();
-      scrollbarX.series.push(series);
-      chart.scrollbarX = scrollbarX;
-
-      this.chart = chart;
     });
   }
 
-  ngOnDestroy() {
-    this.zone.runOutsideAngular(() => {
-      if (this.chart) {
-        this.chart.dispose();
-      }
-    });
+  CreateRecord() {
+    let record = {};
+    record['Name'] = this.studentName;
+    record['Age'] = this.studentAge;
+    record['Address'] = this.studentAddress;
+    this.crudService.create_student(record).then(resp => {
+      this.studentName = "";
+      this.studentAge = undefined;
+      this.studentAddress = "";
+      console.log(resp);
+    })
+      .catch(error => {
+        console.log(error);
+      });
   }
-  async openLoader() {
-    const loading = await this.loadingController.create({
-      message: 'Please Wait ...',
-      duration: 2000
-    });
-    await loading.present();
+
+  RemoveRecord(rowID) {
+    this.crudService.delete_student(rowID);
   }
-  async closeLoading() {
-    return await this.loadingController.dismiss();
+
+  EditRecord(record) {
+    record.isEdit = true;
+    record.EditName = record.Name;
+    record.EditAge = record.Age;
+    record.EditAddress = record.Address;
+  }
+
+  UpdateRecord(recordRow) {
+    let record = {};
+    record['Name'] = recordRow.EditName;
+    record['Age'] = recordRow.EditAge;
+    record['Address'] = recordRow.EditAddress;
+    this.crudService.update_student(recordRow.id, record);
+    recordRow.isEdit = false;
   }
 }
